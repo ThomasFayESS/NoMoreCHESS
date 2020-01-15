@@ -7,11 +7,12 @@ import json
 import urllib.request
 import time
 import sys
+import os
 
 def usage():
     print("usage: " + sys.argv[0] + " filterPrefix outName")
     print("-filterPrefix is the FBS prefix to filter nodes on.")
-    print("-outName is the filename to write these filtered nodes to.")
+    print("-outName is the filename to write a JSON containing these filtered nodes.")
     sys.exit(1)
 
 if len(sys.argv) < 3:
@@ -20,10 +21,14 @@ if len(sys.argv) < 3:
 filterPrefix=str(sys.argv[1])
 outName=str(sys.argv[2])
 
+fPath = os.path.dirname(os.path.realpath(__file__))
+
+if filterPrefix[0] != '=':
+    filterPrefix = "="+ filterPrefix
 listReduced = list()
 
 i=0
-with open("./fbs.json") as fbsNodes:
+with open(fPath + "/../json/fbs.json") as fbsNodes:
     listFBS = json.load(fbsNodes)
     lenFBS=len(listFBS)
     print("filter")
@@ -35,5 +40,5 @@ with open("./fbs.json") as fbsNodes:
             print(str(i) + "/" + str(lenFBS))
     lenReduced=len(listReduced)
     print("Reduced FBS from " + str(lenFBS) + " to " + str(lenReduced) + " nodes.")
-    with open(outName,"w+") as outfile:
+    with open(fPath + "/../json/" + outName,"w+") as outfile:
         json.dump(listReduced,outfile)
