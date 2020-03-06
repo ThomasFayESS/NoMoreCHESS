@@ -6,8 +6,7 @@ For example, only look at nodes from one machine section.
 import json
 import urllib.request
 import time
-import sys
-import os
+import sys, os, getopt
 
 def usage():
     print("usage: " + sys.argv[0] + " filterPrefix outName")
@@ -18,8 +17,25 @@ def usage():
 if len(sys.argv) < 3:
     usage()
 
-filterPrefix=str(sys.argv[1])
-outName=str(sys.argv[2])
+unixOptions=["f:o:"]
+gnuOptions=["filterPrefix=", "outName="]
+
+try:
+  option_list, arguments = getopt.getopt(sys.argv[1:], unixOptions, gnuOptions)
+except getopt.error as err:
+  usage()
+
+filterPrefix=""
+outName=""
+
+for option, argument in option_list:
+  if option in ("-f", "--filterPrefix"):
+    filterPrefix = argument
+  elif option in ("-o", "--outName"):
+    outName = argument
+
+if len(filterPrefix) < 1 or len(outName) < 1:
+  usage()
 
 fPath = os.path.dirname(os.path.realpath(__file__))
 
