@@ -3,6 +3,7 @@ import json
 import sys
 import time
 import os
+import getopt
 """
 Write a formatted tree of FBS for Control Systems contained with a particular FBS branch.
 E.g. show the control system tree for an accelerator machine section
@@ -10,10 +11,12 @@ E.g. show the control system tree for an accelerator machine section
 
 def usage():
     print("usage: " + sys.argv[0] + " inName outName")
-    print("-inName: JSON file containing the pre-filtered FBS nodes relevant to this FBS branch.")
+    print("-inFilse: JSON file containing the pre-filtered FBS nodes relevant to this FBS branch.")
     print("-fbsPrefix: FBS prefix to use as top-level node.")
     print("e.g. " + sys.argv[0] + " rfq.json =ESS.ACC.A01")
     sys.exit(1)
+
+
 
 """
 Format code
@@ -34,12 +37,27 @@ def getTreeFormatting(level, formatCode, hasSiblings):
 
     return strTreeFormat
 
-if len(sys.argv) < 3:
+
+unixOptions=["i:f:"]
+gnuOptions=["inFile=", "fbsPrefix="]
+
+try:
+    option_list, arguments = getopt.getopt(sys.argv[1:], unixOptions, gnuOptions)
+except getopt.error as err:
     usage()
 
+inFile=""
+fbsPrefix=""
 
-fbsInput=str(sys.argv[1])
-fbsPrefix=str(sys.argv[2])
+for option, argument in option_list:
+  if option in ("-i", "--inFile"):
+    inFile = argument
+  elif option in ("-f", "--fbsPrefix"):
+    fbsPrefix = argument
+
+if len(inFile) < 1 or len(fbsPrefix) < 1:
+    usage()
+
 
 fPath = os.path.dirname(os.path.realpath(__file__))
 # Allow lazy prescription of fbsPrefix 
@@ -56,8 +74,8 @@ downConnect = "│   "
 midBranch = "├── "
 endBranch = "└── "
 
-with open(fPath + "/../json/" + fbsInput) as inFile:
-    list_FBS=json.load(inFile)
+with open(fPath + "/../json/" + inFile) as inputFile:
+    list_FBS=json.load(inputFile)
 
 #list_ControlSystems(Tag, Identation Level, Description, hasUncle, hasSibling)
 list_ControlSystems = list()

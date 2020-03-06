@@ -44,6 +44,7 @@ if filterPrefix[0] != '=':
 listReduced = list()
 
 i=0
+
 with open(fPath + "/../json/fbs.json") as fbsNodes:
     listFBS = json.load(fbsNodes)
     lenFBS=len(listFBS)
