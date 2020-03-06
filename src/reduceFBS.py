@@ -7,11 +7,12 @@ import json
 import urllib.request
 import time
 import sys, os, getopt
+import fnmatch
 
 def usage():
     print("usage: " + sys.argv[0] + " filterPrefix outName")
-    print("-filterPrefix is the FBS prefix to filter nodes on.")
-    print("-outName is the filename to write a JSON containing these filtered nodes.")
+    print("-f --filterPrefix is the FBS prefix to filter nodes on.")
+    print("-o --outName is the filename to write a JSON containing these filtered nodes.")
     sys.exit(1)
 
 if len(sys.argv) < 3:
@@ -29,7 +30,7 @@ filterPrefix=""
 outName=""
 
 for option, argument in option_list:
-  if option in ("-f", "--filterPrefix"):
+  if option in ("-f", "--filterPrefix", "--f*"):
     filterPrefix = argument
   elif option in ("-o", "--outName"):
     outName = argument

@@ -4,6 +4,7 @@ import sys
 import time
 import os
 import getopt
+import re
 """
 Write a formatted tree of FBS for Control Systems contained with a particular FBS branch.
 E.g. show the control system tree for an accelerator machine section
@@ -39,10 +40,10 @@ def getTreeFormatting(level, formatCode, hasSiblings):
 
 
 unixOptions=["i:f:"]
-gnuOptions=["inFile=", "fbsPrefix="]
+long_options=["inFile=", "fbsPrefix="]
 
 try:
-    option_list, arguments = getopt.getopt(sys.argv[1:], unixOptions, gnuOptions)
+    option_list, arguments = getopt.getopt(sys.argv[1:], unixOptions, long_options)
 except getopt.error as err:
     usage()
 
@@ -50,9 +51,9 @@ inFile=""
 fbsPrefix=""
 
 for option, argument in option_list:
-  if option in ("-i", "--inFile"):
+  if option in ("-i", "--inFile") or option[:3] == "--i":
     inFile = argument
-  elif option in ("-f", "--fbsPrefix"):
+  elif option in ("-f", "--fbsPrefix") or option[:3] == "--f":
     fbsPrefix = argument
 
 if len(inFile) < 1 or len(fbsPrefix) < 1:
@@ -82,7 +83,7 @@ list_ControlSystems = list()
 for node in list_FBS:
     if node['tag'] == fbsPrefix[:-1]:
         print(node['tag'] + " ( " + node['description'] + " )")
-    if node['tag'].endswith(".K01"):
+    if node['tag'][-4:-2] == ".K":
         indentLevel = node['level'] - nLevels 
         list_ControlSystems.append([node['tag'],indentLevel,node['description'],0,0])
 
