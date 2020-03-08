@@ -114,6 +114,11 @@ for el in list_matchedNodes:
   list_output.append(midBranch + el[0] +  " ( " + el[1] + " )")
 
 list_output[-1]=list_output[-1].replace(midBranch,endBranch)
-print(fbsPrefix[:-1])
+
+for el in list_FBS:
+  if el['tag'] == fbsPrefix[:-1]:
+    rootDescription = el['description']
+
+print(fbsPrefix[:-1] + " ( " + rootDescription + " ) ")
 for el in list_output:
   print(el.replace(fbsPrefix,""))
