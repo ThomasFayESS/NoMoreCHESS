@@ -13,12 +13,18 @@ if len(sys.argv) < 2:
   usage()
 
 unixOptions = "o"
-gnuOptions = ["outFile"]
+longOptions = ["outFile="]
 
 try:
-  arguments, values = getopt.getopt(sys.argv[1:], unixOptions, gnuOptions)
+  options, arguments = getopt.getopt(sys.argv[1:], unixOptions, longOptions)
 except getopt.error as err:
   usage()
 
-outFile=values[0]
-urllib.request.urlretrieve("https://itip.esss.lu.se/chess/fbs.json", outFile)
+for option, argument in options:
+  if option in ("-o", "--outFile"):
+    outFile = argument
+
+if len(outFile) < 1:
+  usage()
+
+urllib.request.urlretrieve("https://itip.esss.lu.se/chess/fbs.json", "../json/" + outFile)
