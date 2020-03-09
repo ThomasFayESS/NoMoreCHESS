@@ -40,15 +40,25 @@ for option, argument in optionList:
   elif option in ("-m", "--match") or option[:3] == "--m":
     matchNode = argument
 
-
 if len(inFile) < 1 or len(fbsPrefix) < 1 or len(matchNode) < 1:
   usage()
 
+temp=matchNode.split(',')
+list_matchNodes = list()
+if len(temp) == 0:
+  print("Invalid match definition, exiting...")
+  exit(2)
+elif len(temp) == 1:
+  list_matchNodes.append(matchNode)
+else:
+  for el in temp:
+    list_matchNodes.append(el)
 
 # match arbitary FBS nodes BUT limit substring search to four chars
-if len(matchNode) > 4:
-  print("FBS nodes have maximum 4 characters, exiting...")
-  exit(2)
+for matchNode in list_matchNodes:
+  if len(matchNode) > 4:
+    print("FBS nodes have maximum 4 characters, exiting...")
+    exit(2)
 
 fPath = os.path.dirname(os.path.realpath(__file__))
 # Allow lazy prescription of fbsPrefix 
@@ -68,46 +78,43 @@ with open(fPath + "/../json/" + inFile) as inputFile:
 list_matchedNodes = list()
 
 # Parse the FBS for matching nodes
-for el in list_FBS:
-  tag = el['tag']
-  if fbsPrefix in tag:
-    # Match against last branch of tree (the "leaf node").
-    if '.' in tag:
-      parts = tag.split('.')
-      leafNode = parts[-1]
-      if matchNode in leafNode:
+for matchNode in list_matchNodes:
+  print(matchNode)
+  for el in list_FBS:
+    tag = el['tag']
+    if fbsPrefix in tag:
+      # Match against last branch of tree (the "leaf node").
+      leafNode = tag.split('.')[-1]
+      leafNodeComponent = re.sub("[0-9]", "", leafNode)
+      if matchNode == leafNodeComponent:
         list_matchedNodes.append([el['tag'],el['description']])
-    else:
-      print("skipping (invalid) node...")
-      print(tag) 
 
-# Recurse the FBS for ancestor nodes of each matched leaf node.
-list_output = list()
+  # Recurse the FBS for ancestor nodes of each matched leaf node.
+  list_output = list()
 
-for leaf in list_matchedNodes:
-  leafTag = str(leaf[0])
-  level = leafTag.count('.') - fbsPrefix.count('.')
-  # Find ancestor information (tag + description)
-  # Interested in parent relationships only here.
+  for leaf in list_matchedNodes:
+    leafTag = str(leaf[0])
+    level = leafTag.count('.') - fbsPrefix.count('.')
+    # Find ancestor information (tag + description)
+    # Interested in parent relationships only here.
 
-  while level > 1:
-    foundParent = False
-    parentTag = leafTag[:leafTag.rfind('.')]
-    for node in list_FBS:
-      tag = node['tag']
-      if parentTag == tag:
-        leafTag = parentTag
-        level-=1
-        foundParent = True
-        if [tag, node['description']] not in list_matchedNodes: 
-          list_matchedNodes.append([tag, node['description']])
-        break
-    if not foundParent:
-      print("Can't find parent node for tag: " + leafTag)
+    while level > 1:
+      foundParent = False
+      parentTag = leafTag[:leafTag.rfind('.')]
+      for node in list_FBS:
+        tag = node['tag']
+        if parentTag == tag:
+          leafTag = parentTag
+          level-=1
+          foundParent = True
+          if [tag, node['description']] not in list_matchedNodes: 
+            list_matchedNodes.append([tag, node['description']])
+          break
+      if not foundParent:
+        print("Can't find parent node for tag: " + leafTag)
 
-    
+
 list_matchedNodes.sort()
-
 list_output = list()
 
 for el in list_matchedNodes:
