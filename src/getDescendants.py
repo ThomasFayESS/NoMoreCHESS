@@ -14,13 +14,13 @@ def usage():
   print("-i --inFilse: JSON file containing the pre-filtered FBS nodes relevant to this FBS branch.")
   print("-f --fbsPrefix: FBS prefix to use as top-level node.")
   print("-e --exclude: FBS nodes to exclude from listing.")
+  print("-l --levels: Number of levels to show results for.")
   print("e.g. " + sys.argv[0] + " --inFile=rfq.json --fbsPrefix=ESS.ACC.A01.E01 --exclude ''")
   print("e.g. " + sys.argv[0] + " --inFile=rfq.json --fbsPrefix=ESS.ACC.A01.E01 --exclude WG,W")
   sys.exit(1)
 
-
-unixOptions="i:f:e:"
-gnuOptions=["inFile=", "fbsPrefix=", "exclude="]
+unixOptions="i:f:e:l:"
+gnuOptions=["inFile=", "fbsPrefix=", "exclude=", "levels="]
 
 try:
   optionList, arguments = getopt.getopt(sys.argv[1:], unixOptions, gnuOptions)
@@ -38,6 +38,11 @@ for option, argument in optionList:
     fbsPrefix = argument
   elif option in ("-e", "--exclude"):
     exclude = argument
+  elif option in ("-l", "--levels"):
+    levels = int(argument)
+
+
+
 
 list_exclude = list()
 temp = exclude.split(',')
@@ -51,7 +56,9 @@ else:
 if len(inFile) < 1 or len(fbsPrefix) < 1:
   usage()
 
-fPath = os.path.dirname(os.path.realpath(__file__))
+if levels < 1:
+  levels = 50
+
 # Allow lazy prescription of fbsPrefix 
 # And autofill any missing leading or trailing char.
 if not fbsPrefix.endswith("."):
@@ -59,6 +66,7 @@ if not fbsPrefix.endswith("."):
 if not fbsPrefix.startswith("="):
   fbsPrefix="=" + fbsPrefix
 
+fPath = os.path.dirname(os.path.realpath(__file__))
 with open(fPath + "/../json/" + inFile) as inputFile:
   list_FBS=json.load(inputFile)
 
@@ -75,7 +83,8 @@ for el in list_FBS:
       if excluded not in tag:
         noClash += 1
     if noClash == len(list_exclude):
-      list_childNodes.append([el['tag'],el['description']])
+      if tag.count('.') < (fbsPrefix.count('.') + levels):
+        list_childNodes.append([el['tag'],el['description']])
 
 
 list_output = list()
@@ -86,8 +95,13 @@ endBranch = "└── "
 for el in list_childNodes:
   list_output.append(midBranch + el[0] +  " ( " + el[1] + " )")
 
-list_output[-1]=list_output[-1].replace(midBranch,endBranch)
+if len(list_output) <1:
+  print("No matches found.")
+  exit(0)
+
+
 list_output.sort()
+list_output[-1]=list_output[-1].replace(midBranch,endBranch)
 
 for el in list_FBS:
   if el['tag'] == fbsPrefix[:-1]:

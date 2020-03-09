@@ -88,6 +88,12 @@ for el in list_childNodes:
   list_output.append(midBranch + el[0] +  " ( " + el[1] + " )")
 
 list_output.sort()
+
+if len(list_output) < 1:
+  print("No matches found.")
+  exit(0)
+
+list_output.sort()
 list_output[-1]=list_output[-1].replace(midBranch,endBranch)
 
 for el in list_FBS:
