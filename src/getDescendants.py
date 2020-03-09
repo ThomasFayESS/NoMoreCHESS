@@ -15,8 +15,8 @@ def usage():
   print("-f --fbsPrefix: FBS prefix to use as top-level node.")
   print("-e --exclude: FBS nodes to exclude from listing.")
   print("-l --levels: Number of levels to show results for.")
-  print("e.g. " + sys.argv[0] + " --inFile=rfq.json --fbsPrefix=ESS.ACC.A01.E01 --exclude ''")
-  print("e.g. " + sys.argv[0] + " --inFile=rfq.json --fbsPrefix=ESS.ACC.A01.E01 --exclude WG,W")
+  print("e.g. " + sys.argv[0] + " --inFile=rfq.json --fbsPrefix=ESS.ACC.A01.E01 --exclude '' --levels 1")
+  print("e.g. " + sys.argv[0] + " --inFile=rfq.json --fbsPrefix=ESS.ACC.A01.E01 --exclude WG,W --levels 2")
   sys.exit(1)
 
 unixOptions="i:f:e:l:"
