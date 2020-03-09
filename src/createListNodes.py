@@ -25,7 +25,6 @@ gnuOptions=["inFile=", "fbsPrefix=", "match="]
 try:
   optionList, arguments = getopt.getopt(sys.argv[1:], unixOptions, gnuOptions)
 except getopt.error as err:
-  print("1")
   usage()
 
 inFile=""
@@ -79,7 +78,6 @@ list_matchedNodes = list()
 
 # Parse the FBS for matching nodes
 for matchNode in list_matchNodes:
-  print(matchNode)
   for el in list_FBS:
     tag = el['tag']
     if fbsPrefix in tag:
