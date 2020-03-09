@@ -66,15 +66,12 @@ with open(fPath + "/../json/" + inFile) as inputFile:
 list_childNodes = list()
 
 # Parse the FBS for matching nodes
-print(list_exclude)
-print(type(list_exclude))
 for el in list_FBS:
   noClash = 0
   tag = el['tag']
   if fbsPrefix in tag:
     for excluded in list_exclude:
       
-      print(excluded)
       if excluded not in tag:
         noClash += 1
     if noClash == len(list_exclude):
