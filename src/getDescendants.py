@@ -11,7 +11,7 @@ E.g. show the control system tree for an accelerator machine section
 
 def usage():
   print("usage: " + sys.argv[0] + " inName outName")
-  print("-i --inFiles: JSON file containing the pre-filtered FBS nodes relevant to this FBS branch.")
+  print("-i --inFilse: JSON file containing the pre-filtered FBS nodes relevant to this FBS branch.")
   print("-f --fbsPrefix: FBS prefix to use as top-level node.")
   print("-e --exclude: FBS nodes to exclude from listing.")
   print("e.g. " + sys.argv[0] + " --inFile=rfq.json --fbsPrefix=ESS.ACC.A01.E01 --exclude ''")
@@ -75,8 +75,7 @@ for el in list_FBS:
       if excluded not in tag:
         noClash += 1
     if noClash == len(list_exclude):
-      if (tag.count('.') == fbsPrefix.count('.')):
-        list_childNodes.append([tag,el['description']])
+      list_childNodes.append([el['tag'],el['description']])
 
 
 list_output = list()
@@ -87,8 +86,8 @@ endBranch = "└── "
 for el in list_childNodes:
   list_output.append(midBranch + el[0] +  " ( " + el[1] + " )")
 
-list_output.sort()
 list_output[-1]=list_output[-1].replace(midBranch,endBranch)
+list_output.sort()
 
 for el in list_FBS:
   if el['tag'] == fbsPrefix[:-1]:
