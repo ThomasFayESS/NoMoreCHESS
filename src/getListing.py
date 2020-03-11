@@ -5,17 +5,19 @@ import time
 import os
 import getopt
 import re
-"""
-Write a formatted tree of FBS for Control Systems contained with a particular FBS branch.
-E.g. show the control system tree for an accelerator machine section
-"""
+
 
 def usage():
-  print("usage: " + sys.argv[0] + " inName outName")
-  print("-i --inFilse: JSON file containing the pre-filtered FBS nodes relevant to this FBS branch.")
-  print("-f --fbsPrefix: FBS prefix to use as top-level node.")
-  print("-m --match: Match arbitrary FBS node pattern e.g. KF01")
-  print("e.g. " + sys.argv[0] + " rfq.json =ESS.ACC.A01")
+  print("usage: " + sys.argv[0] + " [options] ")
+  print("Get a listing of all nodes underneath a top-level node that match a node pattern")
+  print("Input arguments are ALL REQUIRED. No arguments are optional")
+  print("")
+  print("  -i --inFilse: JSON file containing the pre-filtered FBS nodes relevant to this FBS branch.")
+  print("  -f --fbsPrefix: FBS prefix to use as top-level node. Leading '=' is optional.")
+  print("  -m --match: Match arbitrary FBS node pattern e.g. KF01 or KF or WG. Lists are supported as comma separated value inputs, see example below")
+  print("")
+  print("e.g. " + sys.argv[0] + " --inFile rfq.json --fbsPrefix ESS.ACC.A01 --match WG")
+  print("e.g. " + sys.argv[0] + " --inFile rfq.json --fbsPrefix ESS.ACC.A01 --match WG,WH,WG")
   sys.exit(1)
 
 

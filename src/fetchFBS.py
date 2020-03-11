@@ -1,18 +1,19 @@
 #!/usr/bin/python3
 """
 Fetches ESS FBS from available JSON url
+Unix style and GNU style options are valid.
 """
 import urllib.request, sys, getopt
 
 def usage():
   print("usage " + sys.argv[0] + "-outFile")
-  print("outFile    name of file for saving of FBS JSON.")
+  print("-o --outFile    name of file for saving of resultant FBS JSON.")
   exit(1)
 
 if len(sys.argv) < 2:
   usage()
 
-unixOptions = "o"
+unixOptions = "o:"
 longOptions = ["outFile="]
 
 try:

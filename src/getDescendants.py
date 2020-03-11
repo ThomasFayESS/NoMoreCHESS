@@ -5,16 +5,20 @@ import time
 import os
 import getopt
 """
-Write a formatted tree of FBS for Control Systems contained with a particular FBS branch.
-E.g. show the control system tree for an accelerator machine section
 """
 
 def usage():
-  print("usage: " + sys.argv[0] + " inName outName")
-  print("-i --inFilse: JSON file containing the pre-filtered FBS nodes relevant to this FBS branch.")
-  print("-f --fbsPrefix: FBS prefix to use as top-level node.")
-  print("-e --exclude: FBS nodes to exclude from listing.")
-  print("-l --levels: Number of levels to show results for.")
+  print("usage: " + sys.argv[0] + " [options]")
+  print("Get a listing of FBS nodes contained underneath a particular FBS branch as descendant relationship.")
+  print("E.g. show nodes contained within System X.")
+  print("Exlusion of node patterns and specification of the number of nested levels to return are supported.")
+  print("Input arguments are ALL REQUIRED:")
+  print("")
+  print("  -i --inFile:     JSON file containing the pre-filtered FBS nodes relevant to this FBS branch.")
+  print("  -f --fbsPrefix:  FBS prefix to use as top-level node.")
+  print("  -e --exclude:    FBS nodes to exclude from listing, empty string for no exlusions, supports list format as comma separated values.")
+  print("  -l --levels:     Number of levels to show results for. Integers < 1 means show all available levels.")
+  print("")
   print("e.g. " + sys.argv[0] + " --inFile=rfq.json --fbsPrefix=ESS.ACC.A01.E01 --exclude '' --levels 1")
   print("e.g. " + sys.argv[0] + " --inFile=rfq.json --fbsPrefix=ESS.ACC.A01.E01 --exclude WG,W --levels 2")
   sys.exit(1)
