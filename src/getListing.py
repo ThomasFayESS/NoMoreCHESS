@@ -98,7 +98,7 @@ for matchNode in list_matchNodes:
     # Find ancestor information (tag + description)
     # Interested in parent relationships only here.
 
-    while level > 1:
+    while level > 0:
       foundParent = False
       parentTag = leafTag[:leafTag.rfind('.')]
       for node in list_FBS:
