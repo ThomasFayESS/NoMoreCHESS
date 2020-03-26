@@ -4,6 +4,7 @@ import sys
 import time
 import os
 import getopt
+import argparse
 """
 """
 
@@ -12,40 +13,36 @@ def usage():
   print("Get a listing of FBS nodes contained underneath a particular FBS branch as descendant relationship.")
   print("E.g. show nodes contained within System X.")
   print("Exlusion of node patterns and specification of the number of nested levels to return are supported.")
-  print("Input arguments are ALL REQUIRED:")
   print("")
   print("  -i --inFile:     JSON file containing the pre-filtered FBS nodes relevant to this FBS branch.")
-  print("  -f --fbsPrefix:  FBS prefix to use as top-level node.")
-  print("  -e --exclude:    FBS nodes to exclude from listing, empty string for no exlusions, supports list format as comma separated values.")
-  print("  -l --levels:     Number of levels to show results for. Integers < 1 means show all available levels.")
+  print("  -f --fbsPrefix:  OPTIONAL (default to root node) FBS prefix to use as top-level node.")
+  print("  -e --exclude:    OPTIONAL (default exclude none) FBS nodes to exclude from listing, empty string for no exlusions, supports list format as comma separated values.")
+  print("  -l --levels:     OPTIONAL (default levels = 1) Number of levels to show results for. Integers < 1 means show all available levels.")
   print("")
   print("e.g. " + sys.argv[0] + " --inFile=rfq.json --fbsPrefix=ESS.ACC.A01.E01 --exclude '' --levels 1")
   print("e.g. " + sys.argv[0] + " --inFile=rfq.json --fbsPrefix=ESS.ACC.A01.E01 --exclude WG,W --levels 2")
   sys.exit(1)
 
-unixOptions="i:f:e:l:"
 gnuOptions=["inFile=", "fbsPrefix=", "exclude=", "levels="]
+parser = argparse.ArgumentParser()
+parser.add_argument('--inFile')
+parser.add_argument('--fbsPrefix')
+parser.add_argument('--exclude')
+parser.add_argument('--levels', type=int, help='Number of levels to show results for. Default is 1')
 
-try:
-  optionList, arguments = getopt.getopt(sys.argv[1:], unixOptions, gnuOptions)
-except getopt.error as err:
-  usage()
+args = parser.parse_args()
+inFile = args.inFile
+fbsPrefix = args.fbsPrefix
+exclude = args.exclude
+levels = args.levels
 
-inFile=""
-fbsPrefix=""
-exclude="ZZZZ"
+if exclude is None:
+  exclude="ZZZZ"
 
-for option, argument in optionList:
-  if option in ("-i", "--inFile") or option[:3] == "--i":
-    inFile = argument
-  elif option in ("-f", "--fbsPrefix") or option[:3] == "--f":
-    fbsPrefix = argument
-  elif option in ("-e", "--exclude"):
-    exclude = argument
-  elif option in ("-l", "--levels"):
-    levels = int(argument)
-
-
+if levels is None:
+  levels = 1
+elif levels < 1:
+  levels = 50
 
 
 list_exclude = list()
@@ -57,11 +54,17 @@ elif len(temp) == 1 and temp[0].isalpha():
 else:
   list_exclude=list(temp)
 
-if len(inFile) < 1 or len(fbsPrefix) < 1:
+if inFile is None:
   usage()
 
-if levels < 1:
-  levels = 50
+print(list_exclude)
+
+fPath = os.path.dirname(os.path.realpath(__file__))
+with open(fPath + "/../json/" + inFile) as inputFile:
+  list_FBS=json.load(inputFile)
+
+if fbsPrefix is None:
+  fbsPrefix=list_FBS[0]['tag']
 
 # Allow lazy prescription of fbsPrefix 
 # And autofill any missing leading or trailing char.
@@ -70,26 +73,21 @@ if not fbsPrefix.endswith("."):
 if not fbsPrefix.startswith("="):
   fbsPrefix="=" + fbsPrefix
 
-fPath = os.path.dirname(os.path.realpath(__file__))
-with open(fPath + "/../json/" + inFile) as inputFile:
-  list_FBS=json.load(inputFile)
-
 #list_matchedNodes(Tag, Description)
 list_childNodes = list()
 
 # Parse the FBS for matching nodes
 for el in list_FBS:
   noClash = 0
-  tag = el['tag']
-  if fbsPrefix in tag:
+  tagFull = el['tag']
+  tag = tagFull.replace(fbsPrefix,'')
+  if fbsPrefix in tagFull:
     for excluded in list_exclude:
-      
       if excluded not in tag:
         noClash += 1
     if noClash == len(list_exclude):
-      if tag.count('.') < (fbsPrefix.count('.') + levels):
-        list_childNodes.append([el['tag'],el['description']])
-
+      if tagFull.count('.') < (fbsPrefix.count('.') + levels):
+        list_childNodes.append([tagFull,el['description']])
 
 list_output = list()
 
