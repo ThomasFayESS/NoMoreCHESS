@@ -57,8 +57,6 @@ else:
 if inFile is None:
   usage()
 
-print(list_exclude)
-
 fPath = os.path.dirname(os.path.realpath(__file__))
 with open(fPath + "/../json/" + inFile) as inputFile:
   list_FBS=json.load(inputFile)
