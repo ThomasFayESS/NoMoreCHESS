@@ -23,7 +23,6 @@ def usage():
   print("e.g. " + sys.argv[0] + " --inFile=rfq.json --fbsPrefix=ESS.ACC.A01.E01 --exclude WG,W --levels 2")
   sys.exit(1)
 
-gnuOptions=["inFile=", "fbsPrefix=", "exclude=", "levels="]
 parser = argparse.ArgumentParser()
 parser.add_argument('--inFile')
 parser.add_argument('--fbsPrefix')
