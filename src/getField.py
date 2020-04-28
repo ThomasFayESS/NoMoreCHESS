@@ -5,36 +5,25 @@ import time
 import os
 import getopt
 import argparse
-"""
-"""
-
-def usage():
-  print("usage: " + sys.argv[0] + " [options]")
-  print("Get a listing of FBS nodes contained underneath a particular FBS branch as descendant relationship.")
-  print("E.g. show nodes contained within System X.")
-  print("Exlusion of node patterns and specification of the number of nested levels to return are supported.")
-  print("")
-  print("  -i --inFile:     JSON file containing the pre-filtered FBS nodes relevant to this FBS branch.")
-  print("  -f --fbsPrefix:  OPTIONAL (default to root node) FBS prefix to use as top-level node.")
-  print("  -f --field: OPTIONAL (default to ID) Field to match. Valid options: all, id, essName, parent, level, modified, state, cableName, description")
-  print("")
-  print("e.g. " + sys.argv[0] + " --inFile=rfq.json --fbsPrefix=ESS.ACC.A01.E01")
-  print("e.g. " + sys.argv[0] + " --inFile=rfq.json --fbsPrefix=ESS.ACC.A01.E01 --field id")
-  sys.exit(1)
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--inFile')
-parser.add_argument('--fbsPrefix')
-parser.add_argument('--field')
+parser.add_argument('-i', '--inFile', help='Input file of FBS nodes in JSON format.')
+parser.add_argument('-n', '--node', help='FBS node to match. This is exact match only, however the leading \'=\' character does not need to be specified.')
+parser.add_argument('-f', '--field', help='Type of field to match (default is all), support fields are id, essName, parent, modified, state, cableName, description, level, all.')
+parser.add_argument('-r', '--parent', action='store_const', const=True, help='Parent flag, include this flag to look to the specified node\'s parent.')
 
 args = parser.parse_args()
 inFile = args.inFile
-fbsPrefix = args.fbsPrefix
+node = args.node
 field = args.field
+parent = args.parent
+
 
 #Check inputs
 if field is None:
   field = 'all'
+if parent is None:
+  parent = False
 if inFile is None:
   usage()
 
@@ -48,13 +37,21 @@ fPath = os.path.dirname(os.path.realpath(__file__))
 with open(fPath + "/../json/" + inFile) as inputFile:
   list_FBS=json.load(inputFile)
 
-if fbsPrefix is None:
-  fbsPrefix=list_FBS[0][field]
+if node is None:
+  node=list_FBS[0]['tag']
 
-# Allow lazy prescription of fbsPrefix 
+if parent:
+  if node.count('.') > 0:
+    node=node[:node.rfind('.')]
+  else:
+    print("node invalid")
+    exit(1)
+     
+
+# Allow lazy prescription of node 
 # And autofill any missing leading character.
-if not fbsPrefix.startswith("="):
-  fbsPrefix="=" + fbsPrefix
+if not node.startswith("="):
+  node="=" + node
 
 #list_matchedNodes(Tag, Description)
 list_childNodes = list()
@@ -63,8 +60,8 @@ list_childNodes = list()
 for el in list_FBS:
   noClash = 0
   tagFull = el['tag']
-  tag = tagFull.replace(fbsPrefix,'')
-  if fbsPrefix == tagFull:
+  tag = tagFull.replace(node,'')
+  if node == tagFull:
     if field != 'all':
       print(el[field])
       exit(0)
