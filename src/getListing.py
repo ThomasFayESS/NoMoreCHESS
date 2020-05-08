@@ -28,12 +28,14 @@ parser.add_argument('--inFile')
 parser.add_argument('--fbsPrefix')
 parser.add_argument('--exclude')
 parser.add_argument('--levels', type=int, help='Number of levels to show results for. Default is 1')
+parser.add_argument('--relative')
 
 args = parser.parse_args()
 inFile = args.inFile
 fbsPrefix = args.fbsPrefix
 exclude = args.exclude
 levels = args.levels
+relative = args.relative
 
 if exclude is None:
   exclude="ZZZZ"
@@ -62,6 +64,8 @@ with open(fPath + "/../json/" + inFile) as inputFile:
 
 if fbsPrefix is None:
   fbsPrefix=list_FBS[0]['tag']
+if relative is not None:
+  fbsPrefix = list_FBS[0]['tag'] + '.' + relative
 
 # Allow lazy prescription of fbsPrefix 
 # And autofill any missing leading or trailing char.
