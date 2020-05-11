@@ -8,8 +8,8 @@ import argparse
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-i', '--inFile', help='Input file of FBS nodes in JSON format.')
-parser.add_argument('-n', '--node', help='FBS node to match. This is exact match only, however the leading \'=\' character does not need to be specified.')
-parser.add_argument('-f', '--field', help='Type of field to match (default is all), support fields are id, essName, parent, modified, state, cableName, description, level, all.')
+parser.add_argument('-n', '--node', help='Breakdown structure node to match. This is exact match only, however the leading \'=\' character does not need to be specified.')
+parser.add_argument('-f', '--field', help='Type of FBS field to match (default is all), supported FBS fields are id, essName, parent, modified, state, cableName, description, level, all. Support LBS fields are description, id, level, modified, parent, state tag, type, all.')
 parser.add_argument('-r', '--parent', action='store_const', const=True, help='Parent flag, include this flag to look to the specified node\'s parent.')
 
 args = parser.parse_args()
@@ -25,20 +25,34 @@ if field is None:
 if parent is None:
   parent = False
 if inFile is None:
-  usage()
+  print("--inFile argument is required.")
+  exit(1)
 
-validFields = ['all', 'id', 'essName', 'modified', 'parent', 'level', 'state', 'cableName', 'description']
+fPath = os.path.dirname(os.path.realpath(__file__))
+with open(fPath + "/../json/" + inFile) as inputFile:
+  listBreakdown=json.load(inputFile)
+
+leadingChar = listBreakdown[0]['tag'][0]
+if leadingChar == '=':
+  breakdown = 'fbs'
+elif leadingChar == '+':
+  breakdown = 'lbs'
+
+
+validFieldsFBS = ['all', 'id', 'essName', 'modified', 'parent', 'level', 'state', 'cableName', 'description']
+validFieldsLBS = ['all', 'description', 'id', 'level', 'modified', 'parent', 'state', 'tag', 'type']
+
+if breakdown == 'fbs':
+  validFields = validFieldsFBS
+elif breakdown == 'lbs':
+  validFields = validFieldsLBS
 
 if field not in validFields:
   print("field is invalid")
   exit(1)
 
-fPath = os.path.dirname(os.path.realpath(__file__))
-with open(fPath + "/../json/" + inFile) as inputFile:
-  list_FBS=json.load(inputFile)
-
 if node is None:
-  node=list_FBS[0]['tag']
+  node=listBreakdown[0]['tag']
 
 if parent:
   if node.count('.') > 0:
@@ -50,14 +64,18 @@ if parent:
 
 # Allow lazy prescription of node 
 # And autofill any missing leading character.
-if not node.startswith("="):
-  node="=" + node
+if not node.startswith('=') and not node.startswith('+') :
+  if breakdown == 'fbs': 
+    node = '=' + node
+  if breakdown == 'lbs':
+    node = '+' + node
+
 
 #list_matchedNodes(Tag, Description)
 list_childNodes = list()
 
 # Parse the FBS for matching nodes
-for el in list_FBS:
+for el in listBreakdown:
   noClash = 0
   tagFull = el['tag']
   tag = tagFull.replace(node,'')
