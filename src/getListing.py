@@ -5,38 +5,17 @@ import time
 import os
 import getopt
 import argparse
-"""
-"""
-
-def usage():
-  print("usage: " + sys.argv[0] + " [options]")
-  print("Get a listing of breakdown structure nodes contained underneath a particular breakdown structure branch as descendant relationship.")
-  print("E.g. show nodes contained within System X.")
-  print("Exlusion of node patterns and specification of the number of nested levels to return are supported.")
-  print("")
-  print("  -i --inFile:     JSON file containing the pre-filtered breakdown structure (using reduceBreakdown.py) nodes relevant to this branch.")
-  print("  -f --filterPrefix:  OPTIONAL (default to root node) Breakdown structure prefix to use as top-level node.")
-  print("  -e --exclude:    OPTIONAL (default exclude none) Breakdown structure nodes to exclude from listing, empty string for no exlusions, supports list format as comma separated values.")
-  print("  -l --levels:     OPTIONAL (default levels = 1) Number of levels to show results for. Integers < 1 means show all available levels.")
-  print("  -r --relative:   OPTIONAL define filter prefix relative to root node of input JSON.")
-  print("")
-  print("e.g. " + sys.argv[0] + " --inFile=rfq.json --filterPrefix=ESS.ACC.A01.E01 --exclude '' --levels 1")
-  print("e.g. " + sys.argv[0] + " --inFile=rfq.json --filterPrefix=ESS.ACC.A01.E01 --exclude WG,W --levels 2")
-  sys.exit(1)
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--inFile')
-parser.add_argument('--filterPrefix')
+parser.add_argument('inFile', help = 'The input JSON formatted file containing the ESS breakdown structure to parse.')
+parser.add_argument('--top', help = 'Defines the top node to take listing from. Supports absolute and relative (to global root note) specification. Leading \'=\' and \'+\' characters for the relevant breakdown structure are optional.')
 parser.add_argument('--exclude')
 parser.add_argument('--levels', type=int, help='Number of levels to show results for. Default is 1')
-parser.add_argument('--relative')
-
 args = parser.parse_args()
 inFile = args.inFile
-filterPrefix = args.filterPrefix
+top = args.top
 exclude = args.exclude
 levels = args.levels
-relative = args.relative
 
 if exclude is None:
   exclude="ZZZZ"
@@ -55,35 +34,35 @@ elif len(temp) == 1 and temp[0].isalpha():
 else:
   list_exclude=list(temp)
 
-if inFile is None:
-  usage()
-
 fPath = os.path.dirname(os.path.realpath(__file__))
 with open(fPath + "/../json/" + inFile) as inputFile:
   listBreakdown=json.load(inputFile)
 
 leadingChar = listBreakdown[0]['tag'][0]
 
-if filterPrefix is None:
-  filterPrefix=listBreakdown[0]['tag']
-if relative is not None:
-  filterPrefix = listBreakdown[0]['tag'] + '.' + relative
+
+rootNode = listBreakdown[0]['tag']
+if top is None:
+  top = rootNode
+
+if rootNode not in top:
+  top = rootNode + '.' + top
 
 #Handle special case of '++ESS.A' in LBS
-if filterPrefix[:2] == '++':
-  filterPrefix = '+ESS.'
+if top[:2] == '++':
+  top = '+ESS.'
 
-# Allow lazy prescription of filterPrefix 
+# Allow lazy prescription of top
 # And autofill any missing leading or trailing char.
-if not filterPrefix.endswith("."):
-  filterPrefix=filterPrefix + "."
+if not top.endswith("."):
+  top=top + "."
 if leadingChar == '=':
-  if filterPrefix[0] != '=':
+  if top[0] != '=':
     breakdown = 'lbs'
-    filterPrefix = "=" + filterPrefix
+    top = "=" + top
 elif leadingChar == '+':
-  if filterPrefix[0] != '+':
-    filterPrefix = '+' + filterPrefix
+  if top[0] != '+':
+    top = '+' + top
     breakdown = 'fbs'
 else:
   print("Input file is unsupported. Must be 'lbs' or 'fbs' breakdown structure.")
@@ -96,13 +75,13 @@ list_childNodes = list()
 for el in listBreakdown:
   noClash = 0
   tagFull = el['tag']
-  tag = tagFull.replace(filterPrefix,'')
-  if filterPrefix in tagFull:
+  tag = tagFull.replace(top,'')
+  if top in tagFull:
     for excluded in list_exclude:
       if excluded not in tag:
         noClash += 1
     if noClash == len(list_exclude):
-      if tagFull.count('.') < (filterPrefix.count('.') + levels):
+      if tagFull.count('.') < (top.count('.') + levels):
         list_childNodes.append([tagFull,el['description']])
 
 list_output = list()
@@ -123,9 +102,9 @@ list_output[-1]=list_output[-1].replace(midBranch,endBranch)
 # Default to ESS as root description. 
 rootDescription = "ESS"
 for el in listBreakdown:
-  if el['tag'] == filterPrefix[:-1]:
+  if el['tag'] == top[:-1]:
     rootDescription = el['description']
 
-print(filterPrefix[:-1] + " ( " + rootDescription + " ) ")
+print(top[:-1] + " ( " + rootDescription + " ) ")
 for el in list_output:
-  print(el.replace(filterPrefix,""))
+  print(el.replace(top,""))
