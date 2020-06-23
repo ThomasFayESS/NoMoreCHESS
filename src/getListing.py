@@ -9,7 +9,7 @@ import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument('inFile', help = 'The input JSON formatted file containing the ESS breakdown structure to parse.')
 parser.add_argument('--top', help = 'Defines the top node to take listing from. Supports absolute and relative (to global root note) specification. Leading \'=\' and \'+\' characters for the relevant breakdown structure are optional.')
-parser.add_argument('--exclude')
+parser.add_argument('--exclude', help ='Specifies the nodes to be exlucded. Can be a single node IDs or a comma seperated list. For example --exclude K for single node and --example K,KF,WG for a listing.')
 parser.add_argument('--levels', type=int, help='Number of levels to show results for. Default is 1')
 args = parser.parse_args()
 inFile = args.inFile

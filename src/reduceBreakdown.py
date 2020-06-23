@@ -8,26 +8,16 @@ import urllib.request
 import time
 import sys, os, argparse 
 
-def usage():
-  print("usage: " + sys.argv[0] + " --inFile --filterPrefix --outFile")
-  print("-i --inFile: input file containing FBS in JSON format.")
-  print("-f --filterPrefix: Breakdown structure prefix to filter (reduce) nodes on.")
-  print("-o --outFile: output file (JSON format)")
-  sys.exit(1)
-
 parser = argparse.ArgumentParser()
-parser.add_argument('--inFile')
-parser.add_argument('--filterPrefix')
-parser.add_argument('--outFile')
+parser.add_argument('inFile', help = 'Input JSON formatted breakdown structure to reduce based on filterPrefix specified.')
+parser.add_argument('filterPrefix', help = 'prefix to filter the breakdown structure.')
+parser.add_argument('outFile', help = 'Output file for the reduced breakdown structure in JSON format.')
 
 args = parser.parse_args()
 
 inFile = args.inFile
 filterPrefix = args.filterPrefix
 outFile = args.outFile
-
-if inFile is None or filterPrefix is None or outFile is None:
-  usage()
 
 fPath = os.path.dirname(os.path.realpath(__file__))
 

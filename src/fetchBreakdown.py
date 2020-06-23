@@ -11,19 +11,22 @@ def usage():
   exit(1)
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--outFile')
+parser.add_argument('outFile', help ='Output file for the resultant breakdown listing in JSON format.')
 parser.add_argument('--breakdown',help="breakdown: valid options are 'fbs' or 'lbs'.")
 
 args = parser.parse_args()
 outFile = args.outFile
 breakdown = args.breakdown
 
+if breakdown is None:
+  if 'fbs' in outFile:
+    breakdown = 'fbs' 
+  if 'lbs' in outFile:
+    breakdown = 'lbs'
+
 validBreakdowns=["fbs", "lbs"]
 if breakdown not in validBreakdowns:
   print("Only 'fbs' and 'lbs' are valid breakdown structures for fetching.")
   exit(1)
 
-if outFile is None:
-  print("--outFile is not optional.")
-  exit(1)
 urllib.request.urlretrieve("https://itip.esss.lu.se/chess/" + breakdown  + ".json", "../json/" + outFile)
