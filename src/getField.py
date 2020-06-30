@@ -7,7 +7,7 @@ import getopt
 import argparse
 
 parser = argparse.ArgumentParser()
-parser.add_argument('-i', '--inFile', help='Input file of FBS nodes in JSON format.')
+parser.add_argument('inFile', help='Input file of FBS nodes in JSON format.')
 parser.add_argument('-n', '--node', help='Breakdown structure node to match. This can be specified as absolute node or relative to the top level of the breakdown structure. The leading \'=\' or \'+\' character does not need to be specified.')
 parser.add_argument('-f', '--field', help='Type of FBS field to match (default is all), supported FBS fields are id, essName, parent, modified, state, cableName, description, level, all. Support LBS fields are description, id, level, modified, parent, state tag, type, all.')
 parser.add_argument('-r', '--parent', action='store_const', const=True, help='Parent flag, include this flag to look to the specified node\'s parent.')
@@ -24,9 +24,6 @@ if field is None:
   field = 'all'
 if parent is None:
   parent = False
-if inFile is None:
-  print("--inFile argument is required.")
-  exit(1)
 
 
 fPath = os.path.dirname(os.path.realpath(__file__))
@@ -71,9 +68,6 @@ if parent:
      
 
 
-# Allow relative node references
-if rootNode not in node:
-    node = rootNode + '.' + node
 
 # Autofill any missing leading character.
 
@@ -83,6 +77,11 @@ if not node.startswith('=') and not node.startswith('+') :
   if breakdown == 'lbs':
     node = '+' + node
 
+
+# Allow relative node references
+if rootNode not in node:
+    print(rootNode)
+    node = rootNode + '.' + node
 
 #list_matchedNodes(Tag, Description)
 list_childNodes = list()
