@@ -12,12 +12,14 @@ parser.add_argument('--top', help = 'Defines the top node to take listing from. 
 parser.add_argument('--exclude', help ='Specifies the nodes to be exlucded. Can be a single node IDs or a comma seperated list. For example --exclude K for single node and --example K,KF,WG for a listing.')
 parser.add_argument('--levels', type=int, help='Number of levels to show results for. Default is 1')
 parser.add_argument('--withNames', nargs = '?', const = True, default = None, help='Include ESS name in the output.')
+parser.add_argument('--id', nargs = '?', const = True, default = None, help='Include ESS ID (ESS-#######) in the output.')
 args = parser.parse_args()
 inFile = args.inFile
 top = args.top
 exclude = args.exclude
 levels = args.levels
 withNames = args.withNames
+withID = args.id
 
 
 if exclude is None:
@@ -91,7 +93,15 @@ for el in listBreakdown:
             essName = el['essName']
         else:
           essName = ''
-        list_childNodes.append([tagFull,el['description'], essName])
+        if withID:
+          if el['id'] is None:
+            essID = 'no ESS ID defined'
+          else:
+            essID = el['id']
+        else:
+          essID=''
+          
+        list_childNodes.append([tagFull,el['description'], essName, essID])
 
 
 list_output = list()
@@ -103,7 +113,11 @@ for el in list_childNodes:
     essName = " [" + el[2] + "]"
   else:
     essName = ""
-  list_output.append(midBranch + el[0] +  " ( " + el[1] + " )" + essName)
+  if withID:
+    essID = " {" + el[3] + "}"
+  else:
+    essID = ""
+  list_output.append(midBranch + el[0] +  " ( " + el[1] + " )" + essName + essID)
 
 if len(list_output) <1:
   print("No matches found.")
