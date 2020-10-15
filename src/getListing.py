@@ -51,13 +51,10 @@ if top is None:
     top = rootNode
 
 temp = top.split(',')
-if len(temp) == 1 and not temp[0].isalpha():
-    list_top.append(rootNode)
-elif len(temp) == 1 and temp[0].isalpha():
+if len(temp) == 1:
     list_top.append(temp[0])
 else:
     list_top=list(temp)
-
 
 #list_childNodoes = [tag, description, essName]
 list_childNodes = list()
@@ -84,7 +81,6 @@ for top in list_top:
             else:
                 print("Input file is unsupported. Must be 'lbs' or 'fbs' breakdown structure.")
                 exit(1) 
-
     for el in listBreakdown:
         noClash = 0
         tagFull = el['tag']
