@@ -47,6 +47,9 @@ else:
 rootNode = listBreakdown[0]['tag']
 
 list_top = list()
+if top is None:
+    top = rootNode
+
 temp = top.split(',')
 if len(temp) == 1 and not temp[0].isalpha():
     list_top.append(rootNode)
@@ -82,7 +85,6 @@ for top in list_top:
                 print("Input file is unsupported. Must be 'lbs' or 'fbs' breakdown structure.")
                 exit(1) 
 
-    print(top)
     for el in listBreakdown:
         noClash = 0
         tagFull = el['tag']
@@ -108,37 +110,36 @@ for top in list_top:
                         else:
                             essID=''
                         list_childNodes.append([tagFull,el['description'], essName, essID])
+    list_output = list()
+    midBranch = "├── "
+    for el in list_childNodes:
+        if withNames:
+            essName = " [" + el[2] + "]"
+        else:
+            essName = ""
+        if withID:
+            essID = " {" + el[3] + "}"
+        else:
+            essID = ""
+        list_output.append(midBranch + el[0] +  " ( " + el[1] + " )" + essName + essID)
+    if len(list_output) <1:
+        print("*** No registered nodes for " + top[:-1] + " ***")
+        exit(0)
 
+    list_output.sort()
+    endBranch = "└── "
+    list_output[-1]=list_output[-1].replace(midBranch,endBranch)
 
-list_output = list()
+    # Default to ESS as root description. 
+    rootDescription = "ESS"
+    for el in listBreakdown:
+        if el['tag'] == top[:-1]:
+            rootDescription = el['description']
 
-midBranch = "├── "
-
-for el in list_childNodes:
-    if withNames:
-        essName = " [" + el[2] + "]"
-    else:
-        essName = ""
-    if withID:
-        essID = " {" + el[3] + "}"
-    else:
-        essID = ""
-    list_output.append(midBranch + el[0] +  " ( " + el[1] + " )" + essName + essID)
-
-if len(list_output) <1:
-    print("No registered nodes.")
-    exit(0)
-
-list_output.sort()
-endBranch = "└── "
-list_output[-1]=list_output[-1].replace(midBranch,endBranch)
-
-# Default to ESS as root description. 
-rootDescription = "ESS"
-for el in listBreakdown:
-    if el['tag'] == top[:-1]:
-        rootDescription = el['description']
-
-print(top[:-1] + " ( " + rootDescription + " ) ")
-for el in list_output:
-    print(el.replace(top,""))
+    print(top[:-1] + " ( " + rootDescription + " ) ")
+    for el in list_output:
+        print(el.replace(top,""))
+    
+    # lists are refreshed per "top" loop.
+    list_output.clear()
+    list_childNodes.clear()
