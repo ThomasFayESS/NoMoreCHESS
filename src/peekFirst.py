@@ -14,9 +14,11 @@ inFile = args.inFile
 fPath = os.path.dirname(os.path.realpath(__file__))
 with open(fPath + "/../json/" + inFile) as inputFile:
     listBreakdown=json.load(inputFile)
-
+lenNodes = len(listBreakdown)
 firstEntry = listBreakdown[0]
 validKeys = firstEntry.keys()
-print(firstEntry['tag'])
+print(firstEntry['tag'] + " (" + firstEntry['description'] + ") [" + str(lenNodes) + " nodes]")
+'''
 for key in validKeys:
     print("---" + str(key) + ": " + str(firstEntry[key]))
+'''

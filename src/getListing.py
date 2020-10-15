@@ -56,6 +56,17 @@ if len(temp) == 1:
 else:
     list_top=list(temp)
 
+#Support pattern matching for top node
+if list_top[0][0] == '*':
+    matchPattern=list_top[0][1:]
+    lenMatch=len(matchPattern)
+    list_top.clear()
+    for el in listBreakdown:
+        if matchPattern == el['tag'][-lenMatch:]:
+            list_top.append(el['tag'])
+    if len(list_top) == 0:
+        print("No nodes match pattern: " + top)
+
 #list_childNodoes = [tag, description, essName]
 list_childNodes = list()
 
