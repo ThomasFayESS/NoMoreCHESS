@@ -23,84 +23,91 @@ withID = args.id
 
 
 if exclude is None:
-  exclude="ZZZZ"
+    exclude="ZZZZ"
 
 if levels is None:
-  levels = 1
+    levels = 1
 elif levels < 1:
-  levels = 50
-
-list_exclude = list()
-temp = exclude.split(',')
-if len(temp) == 1 and not temp[0].isalpha():
-  list_exclude.append("ZZZZ")
-elif len(temp) == 1 and temp[0].isalpha():
-  list_exclude.append(temp[0])
-else:
-  list_exclude=list(temp)
+    levels = 50
 
 fPath = os.path.dirname(os.path.realpath(__file__))
 with open(fPath + "/../json/" + inFile) as inputFile:
     listBreakdown=json.load(inputFile)
 leadingChar = listBreakdown[0]['tag'][0]
 
+list_exclude = list()
+temp = exclude.split(',')
+if len(temp) == 1 and not temp[0].isalpha():
+    list_exclude.append("ZZZZ")
+elif len(temp) == 1 and temp[0].isalpha():
+    list_exclude.append(temp[0])
+else:
+    list_exclude=list(temp)
 
 rootNode = listBreakdown[0]['tag']
-if top is None:
-    top = rootNode
 
-if rootNode not in top:
-    top = rootNode + '.' + top
+list_top = list()
+temp = top.split(',')
+if len(temp) == 1 and not temp[0].isalpha():
+    list_top.append(rootNode)
+elif len(temp) == 1 and temp[0].isalpha():
+    list_top.append(temp[0])
+else:
+    list_top=list(temp)
 
-#Handle special case of '++ESS.A' in LBS
-if top[:2] == '++':
-    top = '+ESS.'
-     
-# Allow lazy prescription of top
-# And autofill any missing leading or trailing char.
-if not top.endswith("."):
-    top=top + "."
-if leadingChar == '=':
-    if top[0] != '=':
-        breakdown = 'lbs'
-        top = "=" + top
-    elif leadingChar == '+':
-        if top[0] != '+':
-            top = '+' + top
-            breakdown = 'fbs'
-        else:
-            print("Input file is unsupported. Must be 'lbs' or 'fbs' breakdown structure.")
-            exit(1) 
 
 #list_childNodoes = [tag, description, essName]
 list_childNodes = list()
 
 # Parse the breakdown structure for matching nodes
-for el in listBreakdown:
-    noClash = 0
-    tagFull = el['tag']
-    tag = tagFull.replace(top,'')
-    if top in tagFull:
-        for excluded in list_exclude:
-            if excluded not in tag:
-                noClash += 1
-            if noClash == len(list_exclude):
-                if tagFull.count('.') < (top.count('.') + levels):
-                    if withNames:
-                        if el['essName'] is None:
-                            essName = 'no ESS Name defined'
+for top in list_top:
+    if rootNode not in top:
+        top = rootNode + '.' + top
+    #Handle special case of '++ESS.A' in LBS
+    if top[:2] == '++':
+        top = '+ESS.'
+    # Allow lazy prescription of top
+    # And autofill any missing leading or trailing char.
+    if not top.endswith("."):
+        top=top + "."
+    if leadingChar == '=':
+        if top[0] != '=':
+            breakdown = 'lbs'
+            top = "=" + top
+        elif leadingChar == '+':
+            if top[0] != '+':
+                top = '+' + top
+                breakdown = 'fbs'
+            else:
+                print("Input file is unsupported. Must be 'lbs' or 'fbs' breakdown structure.")
+                exit(1) 
+
+    print(top)
+    for el in listBreakdown:
+        noClash = 0
+        tagFull = el['tag']
+        tag = tagFull.replace(top,'')
+        if top in tagFull:
+            for excluded in list_exclude:
+                if excluded not in tag:
+                    noClash += 1
+                if noClash == len(list_exclude):
+                    if tagFull.count('.') < (top.count('.') + levels):
+                        if withNames:
+                            if el['essName'] is None:
+                                essName = 'no ESS Name defined'
+                            else:
+                                essName = el['essName']
                         else:
-                            essName = el['essName']
-                    else:
-                        essName = ''
-                    if withID:
-                        if el['id'] is None:
-                            essID = 'no ESS ID defined'
+                            essName = ''
+                        if withID:
+                            if el['id'] is None:
+                                essID = 'no ESS ID defined'
+                            else:
+                                essID = el['id']
                         else:
-                            essID = el['id']
-                    else:
-                        essID=''
-                    list_childNodes.append([tagFull,el['description'], essName, essID])
+                            essID=''
+                        list_childNodes.append([tagFull,el['description'], essName, essID])
 
 
 list_output = list()
