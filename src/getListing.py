@@ -63,7 +63,7 @@ if list_top[0][0] == '*':
     list_top.clear()
     for el in listBreakdown:
         if matchPattern == el['tag'][-lenMatch:]:
-            list_top.append(el['tag'])
+            list_top.append([el['tag'],el['description']])
     if len(list_top) == 0:
         print("No nodes match pattern: " + top)
 
@@ -71,7 +71,7 @@ if list_top[0][0] == '*':
 list_childNodes = list()
 
 # Parse the breakdown structure for matching nodes
-for top in list_top:
+for top,description in list_top:
     if rootNode not in top:
         top = rootNode + '.' + top
     #Handle special case of '++ESS.A' in LBS
@@ -119,6 +119,7 @@ for top in list_top:
                         list_childNodes.append([tagFull,el['description'], essName, essID])
     list_output = list()
     midBranch = "├── "
+    endBranch = "└── "
     for el in list_childNodes:
         if withNames:
             essName = " [" + el[2] + "]"
@@ -130,10 +131,10 @@ for top in list_top:
             essID = ""
         list_output.append(midBranch + el[0] +  " ( " + el[1] + " )" + essName + essID)
     if len(list_output) <1:
-        print("*** No registered nodes underneath " + top[:-1] + " ***")
+        print(top + " (" + description + ")")
+        print(endBranch + "No registered child nodes.")
     else:
         list_output.sort()
-        endBranch = "└── "
         list_output[-1]=list_output[-1].replace(midBranch,endBranch)
 
         # Default to ESS as root description. 
