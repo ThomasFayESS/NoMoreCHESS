@@ -34,9 +34,9 @@ validKeys = listBreakdown[0].keys()
 nNodes = "{:,}".format(lenNodes)
 print(nNodes + " nodes.")
 if rangeNodes is None:
-    print("Node " + str(offset) + ": " + listBreakdown[offset]['tag'])
+    print("Node " + str(offset) + ": " + listBreakdown[offset]['tag'] + " (" + listBreakdown[offset]['description'] + ")" )
 
 if n1 is not None and n2 is not None:
     for offsetRange in range(n1,n2):
-        print("Node " + str(offsetRange) + ": " + listBreakdown[offsetRange]['tag'])
+        print("Node " + str(offsetRange) + ": " + listBreakdown[offsetRange]['tag'] + " (" + listBreakdown[offsetRange]['description'] + ")" )
 

@@ -56,23 +56,29 @@ for el in list_filter:
         minLength = len(el)
         shortestFilter = el
 
-commonRoot = False
-while not commonRoot:
-    commonRoot = True
-    for el in list_filter:
-        if shortestFilter not in el:
-            commonRoot = True
-    temp = shortestFilter.split('.')
-    for i in range(0, len(temp) -1 ):
-        if i == 0:
-            shortestFilter = temp[i]
-        else:
-            shortestFilter += "." + temp[i]
+if len(list_filter) > 1:
+    commonRoot = False
+    while not commonRoot:
+        commonRoot = True
+        for el in list_filter:
+            if shortestFilter not in el:
+                commonRoot = True
+        temp = shortestFilter.split('.')
+        for i in range(0, len(temp) -1 ):
+            if i == 0:
+                shortestFilter = temp[i]
+            else:
+                shortestFilter += "." + temp[i]
+else:
+    shortestFilter='ZzZzZ'
+
 
 listReduced = list()
-i=0
 
+formattedTotalNodes = "{:,}".format(lenBreakdown)
 for elFilter in list_filter:
+    i = 0
+    print("Getting nodes under " + elFilter)
     for node in listBreakdown:
         i=i+1
         if node['tag'] == shortestFilter:
@@ -80,9 +86,12 @@ for elFilter in list_filter:
         if node['tag'].startswith(elFilter):
             listReduced.append(node)
         if i % 10000 == 0:
-            print(str(i) + "/" + str(lenBreakdown))
+            print("{:,}".format(i) + "/" + formattedTotalNodes)
 
 lenReduced=len(listReduced)
-print("Reduced " + breakdown + " from " + str(lenBreakdown) + " to " + str(lenReduced) + " nodes.")
+formattedReducedNodes = "{:,}".format(len(listReduced))
+
+print("Reduced " + breakdown + " from " + formattedTotalNodes + " to " + formattedReducedNodes + " nodes.")
+
 with open(fPath + "/../json/" + outFile,"w+") as outfile:
     json.dump(listReduced,outfile)

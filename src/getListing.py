@@ -130,23 +130,22 @@ for top in list_top:
             essID = ""
         list_output.append(midBranch + el[0] +  " ( " + el[1] + " )" + essName + essID)
     if len(list_output) <1:
-        print("*** No registered nodes for " + top[:-1] + " ***")
-        exit(0)
+        print("*** No registered nodes underneath " + top[:-1] + " ***")
+    else:
+        list_output.sort()
+        endBranch = "└── "
+        list_output[-1]=list_output[-1].replace(midBranch,endBranch)
 
-    list_output.sort()
-    endBranch = "└── "
-    list_output[-1]=list_output[-1].replace(midBranch,endBranch)
+        # Default to ESS as root description. 
+        rootDescription = "ESS"
+        for el in listBreakdown:
+            if el['tag'] == top[:-1]:
+                rootDescription = el['description']
 
-    # Default to ESS as root description. 
-    rootDescription = "ESS"
-    for el in listBreakdown:
-        if el['tag'] == top[:-1]:
-            rootDescription = el['description']
-
-    print(top[:-1] + " ( " + rootDescription + " ) ")
-    for el in list_output:
-        print(el.replace(top,""))
-    
+        print(top[:-1] + " ( " + rootDescription + " ) ")
+        for el in list_output:
+            print(el.replace(top,""))
+        
     # lists are refreshed per "top" loop.
     list_output.clear()
     list_childNodes.clear()
