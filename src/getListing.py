@@ -16,6 +16,7 @@ parser.add_argument('--exclude', help ='Specifies the nodes to be exlucded. Can 
 parser.add_argument('--levels', type=int, help='Number of levels to show results for. Default is 1')
 parser.add_argument('--withNames', nargs = '?', const = True, default = None, help='Include ESS name in the output.')
 parser.add_argument('--id', nargs = '?', const = True, default = None, help='Include ESS ID (ESS-#######) in the output.')
+parser.add_argument('--noChildren', nargs='?', const = True, default = None, help ='Do not show children for matched nodes.')
 
 def getAllParents(node):
     currentNode = node
@@ -55,6 +56,7 @@ exclude = args.exclude
 levels = args.levels
 withNames = args.withNames
 withID = args.id
+noChildren = args.noChildren
 
 
 # For formatting the matched nodes
@@ -155,7 +157,7 @@ for top in list_top:
                 essID = getID(el)
             list_matchedNodes.append([el['tag'],dropNewLines(el['description']),"", ""])
         tag = tagFull.replace(top,'')
-        if top in tagFull:
+        if top in tagFull and noChildren is None:
             for excluded in list_exclude:
                 if excluded not in tag:
                     noClash += 1
@@ -199,7 +201,7 @@ for top in list_top:
             print(el.replace(top,""))
         else:
             print(el.replace("[No essName defined.]",""))
-    if not foundMatches: 
+    if not foundMatches and noChildren is None: 
         print(endBranch + "No matched nodes.")
         
         
