@@ -11,7 +11,6 @@ parser.add_argument('inFile', help = 'The input JSON formatted file containing t
 parser.add_argument('findMatch', help = "Match this node.")
 parser.add_argument('--withNames', nargs = '?', const = True, default = None, help='Include ESS name in the output.')
 parser.add_argument('--id', nargs = '?', const = True, default = None, help='Include ESS ID (ESS-#######) in the output.')
-parser.add_argument('--parents', nargs = '?', const = True, default = None, help='Include parent nodes in the output.')
 
 
 def getAllParents(node):
@@ -48,7 +47,6 @@ args = parser.parse_args()
 inFile = args.inFile
 findMatch = args.findMatch
 withNames = args.withNames
-parents = args.parents
 withID = args.id
 
 fPath = os.path.dirname(os.path.realpath(__file__))
