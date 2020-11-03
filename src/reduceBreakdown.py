@@ -7,6 +7,10 @@ import json
 import urllib.request
 import time
 import sys, os, argparse 
+import fnmatch
+import re
+# helpers is local collection of helper functions.
+from helpers import getAllParents, getRoot
 
 parser = argparse.ArgumentParser()
 parser.add_argument('inFile', help = 'Input JSON formatted breakdown structure to reduce based on filter specified.')
@@ -18,6 +22,10 @@ args = parser.parse_args()
 inFile = args.inFile
 filter = args.filter
 outFile = args.outFile
+
+regex = fnmatch.translate(filter)
+regex_compiled = re.compile(regex)
+
 
 fPath = os.path.dirname(os.path.realpath(__file__))
 with open(fPath + "/../json/" + inFile) as fbsNodes:
@@ -34,59 +42,36 @@ else:
     print("Breakdown structure unrecognised. Valid breakdown structures are 'fbs' and 'lbs'. Check input file is valid. Exiting...")
     exit(1)
 
+commonRoot = getRoot(filter)
+if breakdown == 'fbs':
+    if commonRoot[0] != '=':
+        commonRoot = '=' + commonRoot
+if breakdown == 'lbs':
+    if commonRoot[0] != '+':
+        commonRoot = '+' + commonRoot
 
-list_filter = list()
-temp = filter.split(',')
-if len(temp) == 1:
-    list_filter.append(temp[0])
-else:
-    list_filter = list(temp)
-
-
-nFilters = len(list_filter)
-for i in range(0,nFilters):
-    if not list_filter[i].startswith(rootNode):
-        list_filter[i] = rootNode + '.' + list_filter[i]
-    
-#Get the common root node of the filter patterns
-minLength=99999
-shortestFilter=""
-for el in list_filter:
-    if len(el) < minLength:
-        minLength = len(el)
-        shortestFilter = el
-
-if len(list_filter) > 1:
-    commonRoot = False
-    while not commonRoot:
-        commonRoot = True
-        for el in list_filter:
-            if shortestFilter not in el:
-                commonRoot = True
-        temp = shortestFilter.split('.')
-        for i in range(0, len(temp) -1 ):
-            if i == 0:
-                shortestFilter = temp[i]
-            else:
-                shortestFilter += "." + temp[i]
-else:
-    shortestFilter='ZzZzZ'
-
+list_parents = getAllParents(commonRoot)
 
 listReduced = list()
+listTemp = list()
 
 formattedTotalNodes = "{:,}".format(lenBreakdown)
-for elFilter in list_filter:
-    i = 0
-    print("Getting nodes under " + elFilter)
-    for node in listBreakdown:
-        i=i+1
-        if node['tag'] == shortestFilter:
+print("Getting nodes under " + commonRoot)
+for node in listBreakdown:
+    tag = node['tag']
+    if tag == commonRoot:
+        listReduced.append(node)
+    if tag in list_parents:
+        listReduced.append(node)
+    if commonRoot in tag and tag != commonRoot:
+        if regex_compiled.search(tag) is not None:
+            for el in listTemp:
+                if el['tag'] in tag:
+                    listReduced.append(el)
             listReduced.append(node)
-        if node['tag'].startswith(elFilter):
-            listReduced.append(node)
-        if i % 10000 == 0:
-            print("{:,}".format(i) + "/" + formattedTotalNodes)
+            listTemp.clear()
+        else:
+            listTemp.append(node)
 
 lenReduced=len(listReduced)
 formattedReducedNodes = "{:,}".format(len(listReduced))
