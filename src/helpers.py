@@ -15,6 +15,7 @@ def getAllParents(node):
                 currentNode += '.' + temp[i]
         nLevels = currentNode.count('.')
         list_parents.append(currentNode) 
+    list_parents.sort()
     return list_parents
 
 '''
