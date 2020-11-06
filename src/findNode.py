@@ -6,20 +6,8 @@ import os
 import getopt
 import argparse
 
-def getAllParents(node):
-    currentNode = node
-    list_parents = list()
-    nLevels = currentNode.count('.')
-    while nLevels > 0:
-        temp = currentNode.split('.')
-        for i in range (0, nLevels):
-            if i == 0:
-                currentNode = temp[0]
-            else:
-                currentNode += '.' + temp[i]
-        nLevels = currentNode.count('.')
-        list_parents.append(currentNode) 
-    return list_parents
+# Local module
+import helpers
 
 def getName(node):
     if node['essName'] is not None:
@@ -50,22 +38,38 @@ def addName(name):
     else:
         return ' [No essName found]'
 
+def currentTagOnly(tag, lastTag):
+    if lastTag == '':
+        return tag
+    else:
+        return tag.replace(lastTag + '.', '')
+
 parser = argparse.ArgumentParser()
 parser.add_argument('inFile', help = 'The input JSON formatted file containing the ESS breakdown structure to parse.')
-parser.add_argument('--tag', help = "Match node by tag.")
+parser.add_argument('--tag', type=str, help = "Match node by tag. Case insenstive so for example =ess.acc.a01 is ok.")
 parser.add_argument('--cable', help = "Match node by cableName.")
-parser.add_argument('--name', help = "Match node by essName.")
-parser.add_argument('--withName', nargs = '?', const = True, default = None, help='Include ESS name in the output.')
+parser.add_argument('--name', help = "Match node by essName. Case insensitive so for example rfq-010:rfs-dig-101 is ok.")
+parser.add_argument('--withName', type=str, nargs = '?', const = True, default = None, help='Include ESS name in the output.')
 parser.add_argument('--id', nargs = '?', const = True, default = None, help='Include ESS ID (ESS-#######) in the output.')
 parser.add_argument('--naked', nargs = '?', const = True, default = None, help='Show only the matching breakdown structure tab.')
+parser.add_argument('--group', type = int, help='Number of parents to show in a single row grouping. Default is 1.')
 
 args = parser.parse_args()
 inFile = args.inFile
 matchTag = args.tag
+if matchTag is not None:
+    matchTag = matchTag.upper()
 matchCable = args.cable
 matchName = args.name
+if matchName is not None:
+    matchName = matchName.upper()
 naked = args.naked
+grouping = args.group
 
+if grouping is None:
+    grouping = 1
+if grouping <= 0:
+    grouping = 1
 withName = args.withName
 withID = args.id
 
@@ -100,12 +104,10 @@ if matchTag is not None:
                 print("Input file is unsupported. Must be 'lbs' or 'fbs' breakdown structure.")
                 exit(1) 
 
-    list_parents = getAllParents(matchTag)
+    list_parents = helpers.getAllParents(matchTag)
     list_matchedParents = list()
 
-
 matchedNode = ""
-
 
 for el in listBreakdown:
     noClash = 0
@@ -115,47 +117,66 @@ for el in listBreakdown:
     foundMatches = False
     if matchName is not None:
         if el['essName'] == matchName:
-            matchedNode = formatOutput(tagFull, el['description']) 
+            matchedNode = {'tag': tagFull, 'desc': el['description']}
             break
     if matchCable is not None:
         if el['cableName'] == matchCable:
-            matchedNode = formatOutput(tagFull, el['description']) 
+            matchedNode = {'tag': tagFull, 'desc': el['description']}
             break
     if matchTag is not None:
         if tagFull in list_parents:
-            list_matchedParents.append(formatOutput(tagFull, el['description']))
+            list_matchedParents.append({'tag': tagFull, 'desc': el['description']})
         if tagFull == matchTag:
-            matchedNode = formatOutput(tagFull, el['description']) 
+            matchedNode = {'tag': tagFull, 'desc': el['description']}
             break
 
-
-if withName:
-    matchedNode.append(addName(el['essName']))
-if withID:
-    matchedNode.append(addID(el['id']))
+if len(matchedNode) > 0:
+    if withName:
+        matchedNode['desc'] += addName(el['essName'])
+    if withID:
+        matchedNode['desc'] += addID(el['id'])
 
 if len(matchedNode) > 0 and matchTag is None:
     list_parentNodes = list()
-    list_parents = getAllParents(matchedNode[0])
+    list_parents = helpers.getAllParents(matchedNode['tag'])
     list_matchedParents = list()
     for el in listBreakdown:
         tagFull = el['tag']
         if tagFull in list_parents:
-            list_matchedParents.append(tagFull + ' ( ' + el['description'] + ' ) ')
+            list_matchedParents.append({'tag' : tagFull, 'desc': el['description']})
         if len(list_matchedParents) == len(list_parents):
             break
 
 if len(matchedNode) > 0 and len(list_matchedParents) > 0:
     strOut = ''
     if naked is None:
-        for el in matchedNode:
-            strOut += el
+        print("*" * 50)
+        print(matchedNode['tag'] + " ( " + matchedNode['desc'] + " ) ")
     else:
-        strOut = matchedNode[0]
-    print(strOut)
+        print(matchedNode['tag'])
+
     if naked is None:
         print("*** Parent nodes ***")
-        for el in list_matchedParents:
-            print(el)
+        # Show parents in triplets for readability
+        i = 1
+        # Aggregate Descriptions in triplets
+        aggDesc = ''
+        lastTag = ''
+        for parent in list_matchedParents:
+            spacer = " " * (i - grouping)
+            if grouping == 1:
+                currentTag = currentTagOnly(parent['tag'],lastTag)
+                print(" " * 2 * (i-1) + currentTag + " ( " + parent['desc'] + " )")
+                lastTag = parent['tag']
+            else:
+                if i % grouping == 1:
+                    aggDesc = parent['desc']
+                else:
+                    aggDesc += ' -> ' + parent['desc']
+                if i % grouping == 0 or parent == list_matchedParents[-1]:
+                    currentTag = currentTagOnly(parent['tag'],lastTag)
+                    print(spacer + currentTag + " ( " + aggDesc + " )")
+                    lastTag = parent['tag']
+            i += 1
 else:
     print("No matched node.")
