@@ -13,10 +13,12 @@ def usage():
 parser = argparse.ArgumentParser()
 parser.add_argument('outFile', help ='Output file for the resultant breakdown listing in JSON format.')
 parser.add_argument('--breakdown',help="breakdown: valid options are 'fbs' or 'lbs'.")
+parser.add_argument('--source',help="Data source, either json (default) or XML endpoint available.")
 
 args = parser.parse_args()
 outFile = args.outFile
 breakdown = args.breakdown
+source = args.source
 
 if breakdown is None:
   if 'fbs' in outFile:
@@ -24,9 +26,18 @@ if breakdown is None:
   if 'lbs' in outFile:
     breakdown = 'lbs'
 
+if source is None:
+    source=json
+
+validSources=["json", "xml"]
 validBreakdowns=["fbs", "lbs"]
+
 if breakdown not in validBreakdowns:
   print("Only 'fbs' and 'lbs' are valid breakdown structures for fetching.")
   exit(1)
 
-urllib.request.urlretrieve("https://itip.esss.lu.se/chess/" + breakdown  + ".json", "../json/" + outFile)
+if source not in validSources:
+    print("Only JSON and XML sources are available.")
+    exit(1)
+
+urllib.request.urlretrieve("https://itip.esss.lu.se/chess/" + breakdown  + "." + source, "../" + source + "/" + outFile)
