@@ -72,6 +72,6 @@ for offsetRange in range(n1,n2 + 1):
         for el in validKeys:
             fieldVal = listBreakdown[offsetRange][el] 
             if fieldVal is not None:
-                print("-> " + el + ": " + str(fieldVal))
+                print("~> " + el + ": " + str(fieldVal))
             else:
-                print("-> " + el + ": " + "None")
+                print("~> " + el + ": " + "None")
