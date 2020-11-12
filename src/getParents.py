@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 import json
 import argparse
 import os
@@ -16,7 +16,8 @@ nodeFind = args.node
 nodeFind = nodeFind.upper()
 nParents = args.parents
 
-endBranch = "└── "
+# Use '~' char to order after '=' and '+' char
+endBranch = "~> "
 
 if nodeFind[0] != '=' and nodeFind[0] != '.':
     print("1")
@@ -56,8 +57,8 @@ for node in listBreakdown:
     if node['tag'] == nodeFind:
         list_matchedNodes.append([node['tag'], node['description']])
 
-print("*" * 10 + "Breakdown Hierarchy" + "*" * 10)
 print("")
+print("*" * 10 + "Breakdown Hierarchy" + "*" * 10)
 countFirstTag = list_matchedNodes[0][0].count('.')
 lastTag=''
 
