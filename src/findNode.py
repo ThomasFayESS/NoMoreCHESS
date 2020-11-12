@@ -172,7 +172,7 @@ if len(matchedNode) > 0 and len(list_matchedParents) > 0:
                 if i % grouping == 1:
                     aggDesc = parent['desc']
                 else:
-                    aggDesc += ' -> ' + parent['desc']
+                    aggDesc += ' ~> ' + parent['desc']
                 if i % grouping == 0 or parent == list_matchedParents[-1]:
                     currentTag = currentTagOnly(parent['tag'],lastTag)
                     print(spacer + currentTag + " ( " + aggDesc + " )")
