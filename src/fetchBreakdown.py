@@ -27,7 +27,7 @@ if breakdown is None:
     breakdown = 'lbs'
 
 if source is None:
-    source=json
+    source='json'
 
 validSources=["json", "xml"]
 validBreakdowns=["fbs", "lbs"]
