@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 import json
 import sys
 import os
@@ -27,6 +27,7 @@ parser.add_argument('inFile', help = 'The input JSON formatted file containing t
 parser.add_argument('node', help = "'Root' node for listing children.")
 parser.add_argument('--withNames', nargs = '?', const = True, default = None, help='Include ESS name in the output.')
 parser.add_argument('--id', nargs = '?', const = True, default = None, help='Include ESS ID (ESS-#######) in the output.')
+parser.add_argument('--levels', type=int, help='Number of levels underneath the root node to return.')
 
 
 def dropNewLines(str):
@@ -35,12 +36,24 @@ def dropNewLines(str):
 args = parser.parse_args()
 inFile = args.inFile
 nodeFind = args.node
+nodeFind = nodeFind.upper()
 withNames = args.withNames
 withID = args.id
+nLevels = args.levels
+
+if nLevels is None or nLevels < 0:
+    nLevels = 50
+
+if nodeFind[-1] == '?':
+    nodeFind = nodeFind[:-1]
+    nLevels = 1
+elif nodeFind[-1] == '$':
+    nodeFind = nodeFind[:-1]
+    nLevels = 0
 
 # For formatting the matched nodes
-midBranch = "├── "
-endBranch = "└── "
+# Use '~' to order after '=' and '+' chars in sorting
+matchPrefix = "~> "
 
 fPath = os.path.dirname(os.path.realpath(__file__))
 with open(fPath + "/../json/" + inFile) as inputFile:
@@ -74,6 +87,7 @@ list_exclude = list()
 #list_matchedNodes = [tag, description, essName, essID]
 list_matchedNodes = list()
 
+nodeCount_find = nodeFind.count('.')
 for node in listBreakdown:
     noClash = 0
     tagFull = node['tag']
@@ -91,10 +105,9 @@ for node in listBreakdown:
                 essID = getID(node)
             else:
                 essID = ''
-            list_matchedNodes.append(midBranch + tagFull.replace(nodeFind + '.',"") + getDesc(node) + essName + essID)
+            nodeCount_tag = tagFull.count('.')
+            if nodeCount_tag <= nodeCount_find + nLevels:
+                list_matchedNodes.append(matchPrefix + tagFull.replace(nodeFind + '.',"") + getDesc(node) + essName + essID)
         
-
-list_matchedNodes[-1] = list_matchedNodes[-1].replace(midBranch,endBranch)
 for node in list_matchedNodes:
     print(node)
-
